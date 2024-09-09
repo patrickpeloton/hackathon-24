@@ -7,6 +7,7 @@ export default function Home() {
   const [speed, setSpeed] = useState(0);
   const [incline, setIncline] = useState(0);
   const [targetIncline, setTargetIncline] = useState(0);
+  const [successfulClick, setClick] = useState(false);
   const cfuRef = useRef<any>(null);
 
   function withTreadMetrics() {
@@ -65,13 +66,19 @@ export default function Home() {
 
   return (
     <div className={styles.page}>
+      {successfulClick && <div>You clicked the button!</div>}
       <div>Speed: {speed}</div>
       <div>Incline: {incline}</div>
       <div>Target Incline: {targetIncline}</div>
-      <button onClick={() => cfuRef.current.setTargetSpeed(2)}>
+      <button
+        onClick={() => {
+          setClick(true);
+          cfuRef.current.setTargetIncline(2);
+        }}
+      >
         Bump the speed!
       </button>
-      Version 5
+      Version 6
     </div>
   );
 }
