@@ -3,8 +3,6 @@
 import styles from "./page.module.css";
 import { useEffect, useState, useRef } from "react";
 
-let CfuTreadSensor: any;
-
 export default function Home() {
   const [speed, setSpeed] = useState(0);
   const [incline, setIncline] = useState(0);
@@ -14,7 +12,7 @@ export default function Home() {
   function withTreadMetrics() {
     try {
       // request updates at 30Hz (30 times/second).
-      cfuRef.current = new CfuTreadSensor({ frequency: 30 });
+      cfuRef.current = new (window as any).CfuTreadSensor({ frequency: 30 });
       // current implementation will not report any errors from the cfu
       // but chromium can report errors for permissions and such
       cfuRef.current?.addEventListener("error", (event: any) => {
@@ -48,23 +46,21 @@ export default function Home() {
 
   useEffect(() => {
     // not sure if we need to run this permissions code
-    setTimeout(() => {
-      if (navigator.permissions != null) {
-        // we need to ask the user for permissions to access the sensor
-        navigator.permissions
-          .query({ name: "cfu-tread" as PermissionName })
-          .then((result) => {
-            if (result.state == "denied") {
-              console.log("Permission to use CFU sensor is denied.");
-              return;
-            }
+    if (navigator.permissions != null) {
+      // we need to ask the user for permissions to access the sensor
+      navigator.permissions
+        .query({ name: "cfu-tread" as PermissionName })
+        .then((result) => {
+          if (result.state == "denied") {
+            console.log("Permission to use CFU sensor is denied.");
+            return;
+          }
 
-            withTreadMetrics();
-          });
-      } else {
-        withTreadMetrics();
-      }
-    }, 2000);
+          withTreadMetrics();
+        });
+    } else {
+      withTreadMetrics();
+    }
   }, []);
 
   return (
@@ -72,7 +68,7 @@ export default function Home() {
       <div>Speed: {speed}</div>
       <div>Incline: {incline}</div>
       <div>Target Incline: {targetIncline}</div>
-      Version 3
+      Version 4
     </div>
   );
 }
