@@ -58,6 +58,7 @@
           try {
               // request updates at 30Hz (30 times/second).
               cfu = new CfuTreadSensor({ frequency: 30 });
+              console.log(cfu);
               // current implementation will not report any errors from the cfu
               // but chromium can report errors for permissions and such
               cfu.addEventListener("error", (event) => {
@@ -72,19 +73,24 @@
 
               // add event listener to start receiving sensor input
               cfu.addEventListener("reading", (e) => {
-                  console.log(`Bike data received speed ${cfu.speed}, incline ${cfu.incline}, target incline ${cfu.targetIncline}`);
+                  console.log(`Tread data received speed ${cfu.speed}, incline ${cfu.incline}, target incline ${cfu.targetIncline} target speed ${cfu.targetSpeed}`);
                   // let's update the DOM with new values
                   Dom.set("speed", cfu.speed)
                   Dom.set("incline", cfu.incline)
                   Dom.set("target-incline", cfu.targetIncline)
+                  Dom.set("target-speed", cfu.targetSpeed)
               })
 
               if (cfu != null) {
                   cfu.start()
 
                   window.onload = (event) => {
-                      console.log(Dom.get('set-target-incline-button'))
-                      console.log(Dom.get('set-target-incline-value'))
+                      Dom.get('set-target-speed-button').addEventListener('click', (event) => {
+                          let newTargetSpeed = Dom.get("set-target-speed-value").value
+                          console.log(`Setting target speed to ${newTargetSpeed}`)
+                          cfu.setTargetSpeed(newTargetSpeed)
+                      });
+
                       Dom.get('set-target-incline-button').addEventListener('click', (event) => {
                           let newTargetIncline = Dom.get("set-target-incline-value").value
                           console.log(`Setting target incline to ${newTargetIncline}`)
@@ -175,7 +181,6 @@
     </script>
   </head>
   <body>
-    Version 1
     <p id="bike">
       <span>Bike</span>
       Resistance: <span id="resistance">0</span>
@@ -194,7 +199,10 @@
       Speed: <span id="speed">0</span>
       Incline: <span id="incline">0</span>
       Target Incline: <span id="target-incline">0</span>
-      <input type="number" id="set-target-incline-value" max="6" min="0" value="0"></input>
+      Target Speed: <span id="target-speed">0</span>
+      <input type="number" id="set-target-speed-value" max="12" min="0" value="0"></input>
+      <input type="button" id="set-target-speed-button" value="Set Speed"></button>
+      <input type="number" id="set-target-incline-value" max="10" min="0" value="0"></input>
       <input type="button" id="set-target-incline-button" value="Set Incline"></button>
     </p>
     <p id="row">
