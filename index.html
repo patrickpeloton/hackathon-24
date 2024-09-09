@@ -81,6 +81,16 @@
 
               if (cfu != null) {
                   cfu.start()
+
+                  window.onload = (event) => {
+                      console.log(Dom.get('set-target-incline-button'))
+                      console.log(Dom.get('set-target-incline-value'))
+                      Dom.get('set-target-incline-button').addEventListener('click', (event) => {
+                          let newTargetResistance = Dom.get("set-target-incline-value").value
+                          console.log(`Setting target incline to ${newTargetResistance}`)
+                          cfu.setIncline(newTargetResistance)
+                      });
+                  }
               }
           } catch (err) {
               console.log("Error opening tread " + err)
@@ -183,6 +193,8 @@
       Speed: <span id="speed">0</span>
       Incline: <span id="incline">0</span>
       Target Incline: <span id="target-incline">0</span>
+      <input type="number" id="set-target-incline-value" max="6" min="0" value="0"></input>
+      <input type="button" id="set-target-incline-button" value="Set Incline"></button>
     </p>
     <p id="row">
       <span>Row</span>
