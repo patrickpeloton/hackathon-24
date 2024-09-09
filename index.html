@@ -88,7 +88,7 @@
                       Dom.get('set-target-incline-button').addEventListener('click', (event) => {
                           let newTargetResistance = Dom.get("set-target-incline-value").value
                           console.log(`Setting target incline to ${newTargetResistance}`)
-                          cfu.setIncline(newTargetResistance)
+                          cfu.setTargetIncline(newTargetResistance)
                       });
                   }
               }
