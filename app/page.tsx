@@ -72,13 +72,13 @@ export default function Home() {
       <div>Target Incline: {targetIncline}</div>
       <button
         onClick={() => {
-          setClick(true);
           cfuRef.current.setTargetIncline(2);
+          setClick(true);
         }}
       >
         Bump the speed!
       </button>
-      Version 6
+      Version 7
     </div>
   );
 }
