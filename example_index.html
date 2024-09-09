@@ -1,0 +1,193 @@
+<html>
+  <head>
+    <title>CFU sensor data example</title>
+    <script>
+      var Dom = {
+          get:  function(id) { return ((id instanceof HTMLElement) || (id === document)) ? id : document.getElementById(id); },
+          set:  function(id, html) { Dom.get(id).innerHTML = html; }
+      }
+
+      function withBikeMetrics() {
+          let cfu = null
+          try {
+              // request updates at 30Hz (30 times/second).
+              cfu = new CfuBikeSensor({ frequency: 30 });
+              console.log(cfu)
+              // current implementation will not report any errors from the cfu
+              // but chromium can report errors for permissions and such
+              cfu.addEventListener("error", (event) => {
+                  if (event.error.name == "NotAllowedError") {
+                      // seems like permissions have been revoked by the user
+                      console.log("Permissions revoked.");
+                  } else {
+                      // some other error occured, just log it
+                      console.log("Error reading sensor: " + event.error.name)
+                  }
+              })
+
+              // add event listener to start receiving sensor input
+              cfu.addEventListener("reading", (e) => {
+                  console.log(`Bike data received cadence ${cfu.cadence}, resistance ${cfu.resistance}, target resistance ${cfu.targetResistance}, power ${cfu.power}`);
+                  // let's update the DOM with new values
+                  Dom.set("cadence", cfu.cadence)
+                  Dom.set("resistance", cfu.resistance)
+                  Dom.set("target-resistance", cfu.targetResistance)
+                  Dom.set("power", cfu.power)
+              })
+
+              if (cfu != null) {
+                  cfu.start()
+
+                  window.onload = (event) => {
+                      console.log(Dom.get('set-target-resistance-button'))
+                      console.log(Dom.get('set-target-resistance-value'))
+                      Dom.get('set-target-resistance-button').addEventListener('click', (event) => {
+                          let newTargetResistance = Dom.get("set-target-resistance-value").value
+                          console.log(`Setting target resistance to ${newTargetResistance}`)
+                          cfu.setTargetResistance(newTargetResistance)
+                      });
+                  }
+              }
+          } catch (err) {
+              console.log("Error opening bike " + err)
+          }
+      }
+
+      function withTreadMetrics() {
+          let cfu = null
+          try {
+              // request updates at 30Hz (30 times/second).
+              cfu = new CfuTreadSensor({ frequency: 30 });
+              // current implementation will not report any errors from the cfu
+              // but chromium can report errors for permissions and such
+              cfu.addEventListener("error", (event) => {
+                  if (event.error.name == "NotAllowedError") {
+                      // seems like permissions have been revoked by the user
+                      console.log("Permissions revoked.");
+                  } else {
+                      // some other error occured, just log it
+                      console.log("Error reading sensor: " + event.error.name)
+                  }
+              })
+
+              // add event listener to start receiving sensor input
+              cfu.addEventListener("reading", (e) => {
+                  console.log(`Bike data received speed ${cfu.speed}, incline ${cfu.incline}, target incline ${cfu.targetIncline}`);
+                  // let's update the DOM with new values
+                  Dom.set("speed", cfu.speed)
+                  Dom.set("incline", cfu.incline)
+                  Dom.set("target-incline", cfu.targetIncline)
+              })
+
+              if (cfu != null) {
+                  cfu.start()
+              }
+          } catch (err) {
+              console.log("Error opening tread " + err)
+          }
+      }
+
+      function withRowMetrics() {
+          let cfu = null
+          try {
+              // request updates at 30Hz (30 times/second).
+              cfu = new CfuRowSensor({ frequency: 30 });
+              // current implementation will not report any errors from the cfu
+              // but chromium can report errors for permissions and such
+              cfu.addEventListener("error", (event) => {
+                  if (event.error.name == "NotAllowedError") {
+                      // seems like permissions have been revoked by the user
+                      console.log("Permissions revoked.");
+                  } else {
+                      // some other error occured, just log it
+                      console.log("Error reading sensor: " + event.error.name)
+                  }
+              })
+
+              // add event listener to start receiving sensor input
+              cfu.addEventListener("reading", (e) => {
+                  console.log(`Bike data received stroke ${cfu.stroke}, pace ${cfu.pace}`);
+                  // let's update the DOM with new values
+                  Dom.set("stroke", cfu.stroke)
+                  Dom.set("pace", cfu.pace)
+              })
+
+              if (cfu != null) {
+                  cfu.start()
+              }
+          } catch (err) {
+              console.log("Error opening tread " + err)
+          }
+      }
+
+      // we need to ask the user for permissions to access the sensor
+      if (navigator.permissions != null) {
+          navigator.permissions.query({ name: "cfu-bike" }).then((result) => {
+              if (result.state == "denied") {
+                  console.log("Permission to use CFU sensor is denied.");
+                  return;
+              }
+
+              withBikeMetrics()
+          });
+      } else {
+          withBikeMetrics()
+      }
+
+      if (navigator.permissions != null) {
+          // we need to ask the user for permissions to access the sensor
+          navigator.permissions.query({ name: "cfu-tread" }).then((result) => {
+              if (result.state == "denied") {
+                  console.log("Permission to use CFU sensor is denied.");
+                  return;
+              }
+
+              withTreadMetrics()
+          });
+      } else {
+          withTreadMetrics()
+      }
+
+      if (navigator.permissions != null) {
+          // we need to ask the user for permissions to access the sensor
+          navigator.permissions.query({ name: "cfu-row" }).then((result) => {
+              if (result.state == "denied") {
+                  console.log("Permission to use CFU sensor is denied.");
+                  return;
+              }
+
+              withRowMetrics()
+          });
+      } else {
+          withRowMetrics()
+      }
+
+    </script>
+  </head>
+  <body>
+    <p id="bike">
+      <span>Bike</span>
+      Resistance: <span id="resistance">0</span>
+      Target Resistance: <span id="target-resistance">0</span>
+      <!-- resistance -->
+      Cadence: <span id="cadence">0</span>
+      <!-- cadence -->
+      Power: <span id="power">0</span>
+      <!-- power -->
+      <input type="number" id="set-target-resistance-value" max="100" min="0" value="50"></input>
+      <input type="button" id="set-target-resistance-button" value="Set Resistance"></button>
+      <!-- set target resistance for bike+ -->
+    </p>
+    <p id="tread">
+      <span>Tread</span>
+      Speed: <span id="speed">0</span>
+      Incline: <span id="incline">0</span>
+      Target Incline: <span id="target-incline">0</span>
+    </p>
+    <p id="row">
+      <span>Row</span>
+      Stroke: <span id="stroke">0</span>
+      Pace: <span id="pace">0</span>
+    </p>
+  </body>
+</html>
