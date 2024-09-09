@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import styles from "./page.module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 let CfuTreadSensor: any;
 
@@ -9,15 +9,15 @@ export default function Home() {
   const [speed, setSpeed] = useState(0);
   const [incline, setIncline] = useState(0);
   const [targetIncline, setTargetIncline] = useState(0);
+  const cfuRef = useRef<any>(null);
 
   function withTreadMetrics() {
-    let cfu: any = null;
     try {
       // request updates at 30Hz (30 times/second).
-      cfu = new CfuTreadSensor({ frequency: 30 });
+      cfuRef.current = new CfuTreadSensor({ frequency: 30 });
       // current implementation will not report any errors from the cfu
       // but chromium can report errors for permissions and such
-      cfu.addEventListener("error", (event: any) => {
+      cfuRef.current?.addEventListener("error", (event: any) => {
         if (event.error.name == "NotAllowedError") {
           // seems like permissions have been revoked by the user
           console.log("Permissions revoked.");
@@ -28,18 +28,18 @@ export default function Home() {
       });
 
       // add event listener to start receiving sensor input
-      cfu.addEventListener("reading", () => {
+      cfuRef.current?.addEventListener("reading", () => {
         console.log(
-          `Bike data received speed ${cfu.speed}, incline ${cfu.incline}, target incline ${cfu.targetIncline}`
+          `Bike data received speed ${cfuRef.current.speed}, incline ${cfuRef.current.incline}, target incline ${cfuRef.current.targetIncline}`
         );
         // let's update the DOM with new values
-        setSpeed(cfu?.speed);
-        setIncline(cfu?.incline);
-        setTargetIncline(cfu?.targetIncline);
+        setSpeed(cfuRef.current?.speed);
+        setIncline(cfuRef.current?.incline);
+        setTargetIncline(cfuRef.current?.targetIncline);
       });
 
-      if (cfu != null) {
-        cfu.start();
+      if (cfuRef.current != null) {
+        cfuRef.current.start();
       }
     } catch (err) {
       console.log("Error opening tread " + err);
@@ -70,6 +70,7 @@ export default function Home() {
       <div>Speed: {speed}</div>
       <div>Incline: {incline}</div>
       <div>Target Incline: {targetIncline}</div>
+      Version 1
     </div>
   );
 }
