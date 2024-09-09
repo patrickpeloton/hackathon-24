@@ -9,6 +9,7 @@ export default function Home() {
   const [targetIncline, setTargetIncline] = useState(0);
   const [successfulClick, setClick] = useState(false);
   const cfuRef = useRef<any>(null);
+  const [error, setError] = useState<any>(null);
 
   function withTreadMetrics() {
     try {
@@ -17,6 +18,7 @@ export default function Home() {
       // current implementation will not report any errors from the cfu
       // but chromium can report errors for permissions and such
       cfuRef.current?.addEventListener("error", (event: any) => {
+        setError(event);
         if (event.error.name == "NotAllowedError") {
           // seems like permissions have been revoked by the user
           console.log("Permissions revoked.");
@@ -67,6 +69,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       {successfulClick && <div>You clicked the button!</div>}
+      {error && <div>there was an error: {error}</div>}
       <div>Speed: {speed}</div>
       <div>Incline: {incline}</div>
       <div>Target Incline: {targetIncline}</div>
@@ -78,7 +81,7 @@ export default function Home() {
       >
         Bump the speed!
       </button>
-      Version 7
+      Version 8
     </div>
   );
 }
