@@ -48,21 +48,23 @@ export default function Home() {
 
   useEffect(() => {
     // not sure if we need to run this permissions code
-    if (navigator.permissions != null) {
-      // we need to ask the user for permissions to access the sensor
-      navigator.permissions
-        .query({ name: "cfu-tread" as PermissionName })
-        .then((result) => {
-          if (result.state == "denied") {
-            console.log("Permission to use CFU sensor is denied.");
-            return;
-          }
+    setTimeout(() => {
+      if (navigator.permissions != null) {
+        // we need to ask the user for permissions to access the sensor
+        navigator.permissions
+          .query({ name: "cfu-tread" as PermissionName })
+          .then((result) => {
+            if (result.state == "denied") {
+              console.log("Permission to use CFU sensor is denied.");
+              return;
+            }
 
-          withTreadMetrics();
-        });
-    } else {
-      withTreadMetrics();
-    }
+            withTreadMetrics();
+          });
+      } else {
+        withTreadMetrics();
+      }
+    }, 2000);
   }, []);
 
   return (
@@ -70,7 +72,7 @@ export default function Home() {
       <div>Speed: {speed}</div>
       <div>Incline: {incline}</div>
       <div>Target Incline: {targetIncline}</div>
-      Version 2
+      Version 3
     </div>
   );
 }
