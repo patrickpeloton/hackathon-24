@@ -1,87 +1,161 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import styles from "./page.module.css";
-import { useEffect, useState, useRef } from "react";
 
-export default function Home() {
-  const [speed, setSpeed] = useState(0);
-  const [incline, setIncline] = useState(0);
-  const [targetIncline, setTargetIncline] = useState(0);
-  const [successfulClick, setClick] = useState(false);
-  const cfuRef = useRef<any>(null);
-  const [error, setError] = useState<any>(null);
+import React, { useState } from 'react';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import styles from './page.module.css';
 
-  function withTreadMetrics() {
-    try {
-      // request updates at 30Hz (30 times/second).
-      cfuRef.current = new (window as any).CfuTreadSensor({ frequency: 30 });
-      // current implementation will not report any errors from the cfu
-      // but chromium can report errors for permissions and such
-      cfuRef.current?.addEventListener("error", (event: any) => {
-        setError(event);
-        if (event.error.name == "NotAllowedError") {
-          // seems like permissions have been revoked by the user
-          console.log("Permissions revoked.");
-        } else {
-          // some other error occured, just log it
-          console.log("Error reading sensor: " + event.error.name);
-        }
-      });
+const ItemType = 'SEGMENT';
 
-      // add event listener to start receiving sensor input
-      cfuRef.current?.addEventListener("reading", () => {
-        console.log(
-          `Bike data received speed ${cfuRef.current.speed}, incline ${cfuRef.current.incline}, target incline ${cfuRef.current.targetIncline}`
-        );
-        // let's update the DOM with new values
-        setSpeed(cfuRef.current?.speed);
-        setIncline(cfuRef.current?.incline);
-        setTargetIncline(cfuRef.current?.targetIncline);
-      });
+const initialSegments = [
+  { id: '1', name: 'Warm-up', durationType: 'time', duration: '5', durationUnit: 'min', intensityType: 'speed', intensity: '5 mph' },
+  { id: '2', name: 'Run', durationType: 'time', duration: '20', durationUnit: 'min', intensityType: 'speed', intensity: '7 mph' },
+  { id: '3', name: 'Cool-down', durationType: 'time', duration: '5', durationUnit: 'min', intensityType: 'speed', intensity: '4 mph' },
+];
 
-      if (cfuRef.current != null) {
-        cfuRef.current.start();
+const Segment = ({ segment, index, moveSegment, editSegment }) => {
+  const [, ref] = useDrag({
+    type: ItemType,
+    item: { index },
+  });
+
+  const [, drop] = useDrop({
+    accept: ItemType,
+    hover: (draggedItem) => {
+      if (draggedItem.index !== index) {
+        moveSegment(draggedItem.index, index);
+        draggedItem.index = index;
       }
-    } catch (err) {
-      console.log("Error opening tread " + err);
-    }
-  }
-
-  useEffect(() => {
-    // not sure if we need to run this permissions code
-    if (navigator.permissions != null) {
-      // we need to ask the user for permissions to access the sensor
-      navigator.permissions
-        .query({ name: "cfu-tread" as PermissionName })
-        .then((result) => {
-          if (result.state == "denied") {
-            console.log("Permission to use CFU sensor is denied.");
-            return;
-          }
-
-          withTreadMetrics();
-        });
-    } else {
-      withTreadMetrics();
-    }
-  }, []);
+    },
+  });
 
   return (
-    <div className={styles.page}>
-      {successfulClick && <div>You clicked the button!</div>}
-      {error && <div>there was an error: {error}</div>}
-      <div>Speed: {speed}</div>
-      <div>Incline: {incline}</div>
-      <div>Target Incline: {targetIncline}</div>
-      <button
-        onClick={() => {
-          cfuRef.current.setTargetIncline(2);
-          setClick(true);
-        }}
-      >
-        Bump the speed!
-      </button>
-      Version 8
+    <div ref={(node) => ref(drop(node))} className={styles.segment}>
+      <button onClick={() => editSegment(index)} className={styles.editButton}>Edit</button>
+      <h2>{segment.name}</h2>
+      <p>Duration: {segment.duration} {segment.durationUnit}</p>
+      <p>Intensity: {segment.intensityType} - {segment.intensity}</p>
     </div>
   );
-}
+};
+
+const Page = () => {
+  const [segments, setSegments] = useState(initialSegments);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [formData, setFormData] = useState({ name: '', durationType: 'time', duration: '', durationUnit: '', intensityType: 'speed', intensity: '' });
+
+  const moveSegment = (fromIndex, toIndex) => {
+    const updatedSegments = Array.from(segments);
+    const [movedSegment] = updatedSegments.splice(fromIndex, 1);
+    updatedSegments.splice(toIndex, 0, movedSegment);
+    setSegments(updatedSegments);
+  };
+
+  const editSegment = (index) => {
+    setEditingIndex(index);
+    setFormData(segments[index]);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    const updatedSegments = segments.map((segment, index) =>
+      index === editingIndex ? { ...segment, ...formData } : segment
+    );
+    setSegments(updatedSegments);
+    setEditingIndex(null);
+  };
+
+  const closeModal = () => {
+    setEditingIndex(null);
+  };
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <div className={styles.page}>
+        <h1>Running Workout Segments</h1>
+        {segments.map((segment, index) => (
+          <Segment
+            key={segment.id}
+            index={index}
+            segment={segment}
+            moveSegment={moveSegment}
+            editSegment={editSegment}
+          />
+        ))}
+        <button onClick={() => setSegments([...segments, { id: (segments.length + 1).toString(), name: 'New Segment', durationType: 'time', duration: '10', durationUnit: 'min', intensityType: 'speed', intensity: '6 mph' }])} className={styles.addButton}>Add Segment</button>
+        {editingIndex !== null && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+              <h2>Edit Segment</h2>
+              <form onSubmit={handleFormSubmit} className={styles.editForm}>
+                <label>
+                  Name:
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} />
+                </label>
+                <label>
+                  Duration Type:
+                  <select name="durationType" value={formData.durationType} onChange={handleInputChange}>
+                    <option value="time">Time</option>
+                    <option value="distance">Distance</option>
+                  </select>
+                </label>
+                {formData.durationType === 'time' ? (
+                  <>
+                    <label>
+                      Duration (Time):
+                      <input type="number" name="duration" value={formData.duration} onChange={handleInputChange} />
+                    </label>
+                    <label>
+                      Unit:
+                      <select name="durationUnit" value={formData.durationUnit} onChange={handleInputChange}>
+                        <option value="sec">Seconds</option>
+                        <option value="min">Minutes</option>
+                        <option value="hour">Hours</option>
+                      </select>
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <label>
+                      Duration (Distance):
+                      <input type="number" name="duration" value={formData.duration} onChange={handleInputChange} />
+                    </label>
+                    <label>
+                      Unit:
+                      <select name="durationUnit" value={formData.durationUnit} onChange={handleInputChange}>
+                        <option value="miles">Miles</option>
+                        <option value="meters">Meters</option>
+                        <option value="km">Kilometers</option>
+                      </select>
+                    </label>
+                  </>
+                )}
+                <label>
+                  Intensity Type:
+                  <select name="intensityType" value={formData.intensityType} onChange={handleInputChange}>
+                    <option value="speed">Speed</option>
+                    <option value="output">Output</option>
+                  </select>
+                </label>
+                <label>
+                  Intensity:
+                  <input type="text" name="intensity" value={formData.intensity} onChange={handleInputChange} />
+                </label>
+                <button type="submit">Save</button>
+                <button type="button" onClick={closeModal} className={styles.closeButton}>Cancel</button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </DndProvider>
+  );
+};
+
+export default Page;
