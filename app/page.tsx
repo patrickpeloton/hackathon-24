@@ -65,7 +65,7 @@ const Page = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className={styles.page}>
-        <h1>Running Workout Segments</h1>
+        <h1>Create Workout</h1>
         {segments.map((segment, index) => (
           <Segment
             key={segment.id}
