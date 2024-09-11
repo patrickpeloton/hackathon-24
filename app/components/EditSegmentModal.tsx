@@ -43,95 +43,101 @@ export const EditSegmentModal = ({
       <div className={styles.modal}>
         <h2>Edit Segment</h2>
         <form onSubmit={handleFormSubmit} className={styles.editForm}>
-          <label>
-            Name:
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
-          </label>
-          <label>
-            Duration Type:
-            <select
-              name="durationType"
-              value={formData.durationType}
-              onChange={handleInputChange}
-            >
-              <option value="time">Time</option>
-              <option value="distance">Distance</option>
-            </select>
-          </label>
-          {formData.durationType === "time" ? (
-            <>
-              <label>
-                Duration (Time):
-                <input
-                  type="number"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Unit:
-                <select
-                  name="durationUnit"
-                  value={formData.durationUnit}
-                  onChange={handleInputChange}
-                >
-                  <option value="sec">Seconds</option>
-                  <option value="min">Minutes</option>
-                  <option value="hour">Hours</option>
-                </select>
-              </label>
-            </>
-          ) : (
-            <>
-              <label>
-                Duration (Distance):
-                <input
-                  type="number"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Unit:
-                <select
-                  name="durationUnit"
-                  value={formData.durationUnit}
-                  onChange={handleInputChange}
-                >
-                  <option value="miles">Miles</option>
-                  <option value="meters">Meters</option>
-                  <option value="km">Kilometers</option>
-                </select>
-              </label>
-            </>
-          )}
-          <label>
-            Intensity Type:
-            <select
-              name="intensityType"
-              value={formData.intensityType}
-              onChange={handleInputChange}
-            >
-              <option value="speed">Speed</option>
-              <option value="output">Output</option>
-            </select>
-          </label>
-          <label>
-            Intensity:
-            <input
-              type="text"
-              name="intensity"
-              value={formData.intensity}
-              onChange={handleInputChange}
-            />
-          </label>
+          <div className={styles.fieldGroup}>
+            <label>
+              Name:
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+              />
+            </label>
+          </div>
+          <div className={styles.fieldGroup}>
+            <label>
+              Duration Type:
+              <select
+                name="durationType"
+                value={formData.durationType}
+                onChange={handleInputChange}
+              >
+                <option value="time">Time</option>
+                <option value="distance">Distance</option>
+              </select>
+            </label>
+            {formData.durationType === "time" ? (
+              <>
+                <label>
+                  Duration (Time):
+                  <input
+                    type="number"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label>
+                  Unit:
+                  <select
+                    name="durationUnit"
+                    value={formData.durationUnit}
+                    onChange={handleInputChange}
+                  >
+                    <option value="sec">Seconds</option>
+                    <option value="min">Minutes</option>
+                    <option value="hour">Hours</option>
+                  </select>
+                </label>
+              </>
+            ) : (
+              <>
+                <label>
+                  Duration (Distance):
+                  <input
+                    type="number"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleInputChange}
+                  />
+                </label>
+                <label>
+                  Unit:
+                  <select
+                    name="durationUnit"
+                    value={formData.durationUnit}
+                    onChange={handleInputChange}
+                  >
+                    <option value="miles">Miles</option>
+                    <option value="meters">Meters</option>
+                    <option value="km">Kilometers</option>
+                  </select>
+                </label>
+              </>
+            )}
+          </div>
+          <div className={styles.fieldGroup}>
+            <label>
+              Intensity Type:
+              <select
+                name="intensityType"
+                value={formData.intensityType}
+                onChange={handleInputChange}
+              >
+                <option value="speed">Speed</option>
+                <option value="output">Output</option>
+              </select>
+            </label>
+            <label>
+              Intensity:
+              <input
+                type="text"
+                name="intensity"
+                value={formData.intensity}
+                onChange={handleInputChange}
+              />
+            </label>
+          </div>
           <button type="submit">Save</button>
           <button
             type="button"

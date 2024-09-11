@@ -122,3 +122,26 @@
     width: 90%;
   }
 }
+/* app/page.module.css */
+.fieldGroup {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.fieldGroup label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.fieldGroup input,
+.fieldGroup select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
