@@ -10,11 +10,13 @@ export const Segment = ({
   index,
   moveSegment,
   editSegment,
+  deleteSegment,
 }: {
   segment: SegmentType;
   index: number;
   moveSegment: (fromIndex: number, toIndex: number) => void;
   editSegment: (index: number) => void;
+  deleteSegment: (index: number) => void;
 }) => {
   const [, ref] = useDrag({
     type: ItemType,
@@ -33,9 +35,20 @@ export const Segment = ({
 
   return (
     <div ref={(node) => ref(drop(node)) as any} className={styles.segment}>
-      <button onClick={() => editSegment(index)} className={styles.editButton}>
-        Edit
-      </button>
+      <div className={styles.buttonContainer}>
+        <button
+          onClick={() => editSegment(index)}
+          className={styles.editButton}
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => deleteSegment(index)}
+          className={styles.editButton}
+        >
+          Delete
+        </button>
+      </div>
       <h2>{segment.name}</h2>
       <p>
         Duration: {segment.duration} {segment.durationUnit}

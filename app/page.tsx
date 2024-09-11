@@ -62,6 +62,10 @@ const Page = () => {
     setFormData(segments[index]);
   };
 
+  const deleteSegment = (index: number) => {
+    setSegments(segments.filter((_, i) => i !== index));
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className={styles.page}>
@@ -73,6 +77,7 @@ const Page = () => {
             segment={segment}
             moveSegment={moveSegment}
             editSegment={editSegment}
+            deleteSegment={deleteSegment}
           />
         ))}
         <button
